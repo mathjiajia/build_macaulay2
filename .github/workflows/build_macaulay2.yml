@@ -1,0 +1,46 @@
+name: Install Macaulay2 on Release
+
+on:
+  release:
+    types:
+      - published  # Trigger on the release being published
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Homebrew
+      run: |
+        # Install Homebrew if not already installed
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+    - name: Tap Macaulay2 Homebrew
+      run: |
+        brew tap Macaulay2/homebrew-tap
+
+    - name: Install Macaulay2
+      run: |
+        brew install macaulay2
+
+    - name: Verify Macaulay2 installation
+      run: |
+        macaulay2 --version
+
+    - name: Find Macaulay2 binary
+      id: find_binary
+      run: |
+        # Find where the Macaulay2 binary was installed by Homebrew
+        MACAULAY2_BIN_PATH=$(which macaulay2)
+        echo "MACAULAY2_BIN_PATH=${MACAULAY2_BIN_PATH}" >> $GITHUB_ENV
+        echo "Macaulay2 binary found at: $MACAULAY2_BIN_PATH"
+
+    - name: Upload Macaulay2 Binary as Artifact
+      if: ${{ success() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: macaulay2-binary
+        path: ${{ env.MACAULAY2_BIN_PATH }}
