@@ -38,7 +38,7 @@ jobs:
 
     - name: Upload Macaulay2 Binary as Artifact
       if: ${{ success() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macaulay2-binary
         path: ${{ env.MACAULAY2_BIN_PATH }}
