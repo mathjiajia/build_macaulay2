@@ -20,21 +20,29 @@ jobs:
       run: |
         brew tap Macaulay2/tap  # Correct tap for Macaulay2
 
-    - name: Install M2
+    - name: Install M2 and libomp
       run: |
-        brew install M2  # Install the M2 binary and all dependencies
+        brew install M2  # Install the M2 binary
+        brew install libomp  # Install the required OpenMP library
 
-    - name: Identify M2 Installation Location
+    - name: Identify M2 and libomp Installation Location
       id: find_m2_prefix
       run: |
-        # Find where Homebrew has installed M2
+        # Find where Homebrew has installed M2 and libomp
         M2_PREFIX=$(brew --prefix M2)
+        LIBOMP_PREFIX=$(brew --prefix libomp)
+        
         echo "M2_PREFIX=${M2_PREFIX}" >> $GITHUB_ENV
-        echo "M2 installed at: ${M2_PREFIX}"
+        echo "LIBOMP_PREFIX=${LIBOMP_PREFIX}" >> $GITHUB_ENV
 
-    - name: Upload M2 and All Dependencies as Artifact
+        echo "M2 installed at: ${M2_PREFIX}"
+        echo "libomp installed at: ${LIBOMP_PREFIX}"
+
+    - name: Upload M2 and libomp as Artifact
       if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
         name: m2-homebrew-package
-        path: ${{ env.M2_PREFIX }}  # Upload the entire directory where M2 is installed
+        path: |
+          ${{ env.M2_PREFIX }}  # Upload the entire M2 directory
+          ${{ env.LIBOMP_PREFIX }}  # Upload the libomp directory as well
