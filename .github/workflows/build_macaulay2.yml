@@ -1,9 +1,7 @@
 name: Install Macaulay2 on Release
 
 on:
-  release:
-    types:
-      - published  # Trigger on the release being published
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   build:
