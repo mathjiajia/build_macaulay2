@@ -24,27 +24,27 @@ jobs:
       run: |
         brew install macaulay2
 
-    - name: Ensure macaulay2 is in PATH
+    - name: Ensure M2 is in PATH
       run: |
         # Ensure that Homebrew's binary directory is in the PATH
         echo "$(brew --prefix)/bin" >> $GITHUB_PATH
-        echo "Macaulay2 binary path added to PATH: $(brew --prefix)/bin"
+        echo "M2 binary path added to PATH: $(brew --prefix)/bin"
 
     - name: Verify Macaulay2 installation
       run: |
-        macaulay2 --version
+        M2 --version
 
-    - name: Find Macaulay2 binary
+    - name: Find M2 binary
       id: find_binary
       run: |
-        # Find where the Macaulay2 binary was installed by Homebrew
-        MACAULAY2_BIN_PATH=$(which macaulay2)
-        echo "MACAULAY2_BIN_PATH=${MACAULAY2_BIN_PATH}" >> $GITHUB_ENV
-        echo "Macaulay2 binary found at: $MACAULAY2_BIN_PATH"
+        # Find where the M2 binary was installed by Homebrew
+        M2_BIN_PATH=$(which M2)
+        echo "M2_BIN_PATH=${M2_BIN_PATH}" >> $GITHUB_ENV
+        echo "M2 binary found at: $M2_BIN_PATH"
 
-    - name: Upload Macaulay2 Binary as Artifact
+    - name: Upload M2 Binary as Artifact
       if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
-        name: macaulay2-binary
-        path: ${{ env.MACAULAY2_BIN_PATH }}
+        name: m2-binary
+        path: ${{ env.M2_BIN_PATH }}
