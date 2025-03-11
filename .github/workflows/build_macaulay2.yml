@@ -18,33 +18,23 @@ jobs:
 
     - name: Tap Macaulay2 Homebrew
       run: |
-        brew tap Macaulay2/homebrew-tap
+        brew tap Macaulay2/tap  # Correct tap for Macaulay2
 
-    - name: Install Macaulay2
+    - name: Install M2
       run: |
-        brew install macaulay2
+        brew install M2  # Install the M2 binary and all dependencies
 
-    - name: Ensure M2 is in PATH
+    - name: Identify M2 Installation Location
+      id: find_m2_prefix
       run: |
-        # Ensure that Homebrew's binary directory is in the PATH
-        echo "$(brew --prefix)/bin" >> $GITHUB_PATH
-        echo "M2 binary path added to PATH: $(brew --prefix)/bin"
+        # Find where Homebrew has installed M2
+        M2_PREFIX=$(brew --prefix M2)
+        echo "M2_PREFIX=${M2_PREFIX}" >> $GITHUB_ENV
+        echo "M2 installed at: ${M2_PREFIX}"
 
-    - name: Verify Macaulay2 installation
-      run: |
-        M2 --version
-
-    - name: Find M2 binary
-      id: find_binary
-      run: |
-        # Find where the M2 binary was installed by Homebrew
-        M2_BIN_PATH=$(which M2)
-        echo "M2_BIN_PATH=${M2_BIN_PATH}" >> $GITHUB_ENV
-        echo "M2 binary found at: $M2_BIN_PATH"
-
-    - name: Upload M2 Binary as Artifact
+    - name: Upload M2 and All Dependencies as Artifact
       if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
-        name: m2-binary
-        path: ${{ env.M2_BIN_PATH }}
+        name: m2-homebrew-package
+        path: ${{ env.M2_PREFIX }}  # Upload the entire directory where M2 is installed
