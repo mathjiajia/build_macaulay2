@@ -1,48 +1,60 @@
-name: Install Macaulay2 on Release
-
+name: Install Macaulay2
 on:
   workflow_dispatch:  # Manual trigger
-
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-
+      uses: actions/checkout@v3  # Update to actions/checkout@v3
+    
     - name: Set up Homebrew
       run: |
-        # Install Homebrew if not already installed
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
+        # Homebrew is pre-installed on GitHub's macOS runners
+        brew update
+    
     - name: Tap Macaulay2 Homebrew
       run: |
-        brew tap Macaulay2/tap  # Correct tap for Macaulay2
-
-    - name: Install M2 and libomp
+        brew tap Macaulay2/tap
+    
+    - name: Install M2 and dependencies
       run: |
-        brew install M2  # Install the M2 binary
-        brew install libomp  # Install the required OpenMP library
-
-    - name: Identify M2 and libomp Installation Location
+        brew install macaulay2  # Use lowercase for consistency with the tap
+    
+    - name: Verify M2 Installation
+      run: |
+        M2 --version
+    
+    - name: Identify M2 and dependencies Installation Location
       id: find_m2_prefix
       run: |
         # Find where Homebrew has installed M2 and libomp
-        M2_PREFIX=$(brew --prefix M2)
+        M2_PREFIX=$(brew --prefix macaulay2)
         LIBOMP_PREFIX=$(brew --prefix libomp)
         
         echo "M2_PREFIX=${M2_PREFIX}" >> $GITHUB_ENV
         echo "LIBOMP_PREFIX=${LIBOMP_PREFIX}" >> $GITHUB_ENV
-
         echo "M2 installed at: ${M2_PREFIX}"
         echo "libomp installed at: ${LIBOMP_PREFIX}"
-
-    - name: Upload M2 and libomp as Artifact
+    
+    - name: Create package directory
+      run: |
+        mkdir -p m2-package
+        cp -R "$M2_PREFIX"/* m2-package/
+        mkdir -p m2-package/dependencies/libomp
+        cp -R "$LIBOMP_PREFIX"/* m2-package/dependencies/libomp/
+        
+        # Create a simple README
+        echo "# Macaulay2 Package" > m2-package/README.md
+        echo "This package contains Macaulay2 $(M2 --version | head -n1) and its dependencies." >> m2-package/README.md
+        echo "## Installation" >> m2-package/README.md
+        echo "1. Extract the archive" >> m2-package/README.md
+        echo "2. Add the bin directory to your PATH" >> m2-package/README.md
+    
+    - name: Upload M2 Package as Artifact
       if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
-        name: m2-homebrew-package
-        path: |
-          ${{ env.M2_PREFIX }}  # Upload the entire M2 directory
-          ${{ env.LIBOMP_PREFIX }}  # Upload the libomp directory as well
+        name: macaulay2-package
+        path: m2-package
+        retention-days: 7  # Specify how long to keep the artifact
